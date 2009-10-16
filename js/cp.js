@@ -1,5 +1,5 @@
 /**
-* @version $Id: cp.js 5 2009-07-01 14:05:04Z roosit $
+* @version $Id$
 * @package CMSBrick
 * @copyright Copyright (C) 2008 CMSBrick. All rights reserved.
 * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
