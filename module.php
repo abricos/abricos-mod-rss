@@ -1,20 +1,24 @@
 <?php 
 /**
-* @version $Id$
-* @package CMSBrick
-* @copyright Copyright (C) 2008 CMSBrick. All rights reserved.
-* @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
-*/
-
-global $cms;
+ * Модуль "RSS"
+ * 
+ * @version $Id$
+ * @package CMSBrick
+ * @subpackage RSS
+ * @copyright Copyright (C) 2008 CMSBrick. All rights reserved.
+ * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
+ * @author Alexander Kuzmin (roosit@cmsbrick.ru)
+ */
 
 $modRss = new CMSModuleRss();
-$cms->modules->Register($modRss);
+CMSRegistry::$instance->modules->Register($modRss);
 
 /**
- * Rss модуль.
+ * Модуль "RSS"
  * формат запроса http://domain.com/rss/{имя модуля}/{параметры}
  *
+ * @package CMSBrick
+ * @subpackage RSS
  */
 class CMSModuleRss extends CMSModule {
 	
@@ -43,6 +47,11 @@ class CMSModuleRss extends CMSModule {
 	
 }
 
+/**
+ * Элемент RSS записи
+ * @package CMSBrick
+ * @subpackage RSS
+ */
 class CMSRssWriter2_0Item {
 	
 	public $title = "";
@@ -60,6 +69,11 @@ class CMSRssWriter2_0Item {
 	}
 }
 
+/**
+ * RSS writer
+ * @package CMSBrick
+ * @subpackage RSS
+ */
 class CMSRssWriter2_0 {
 	
 	public function Header(){
@@ -122,6 +136,11 @@ class CMSRssWriter2_0 {
 	}
 }
 
+/**
+ * Статичные функции запросов к базе данных
+ * @package CMSBrick
+ * @subpackage RSS
+ */
 class CMSQRss {
 	
 	public static function RecordList(CMSDatabase $db, $chanelid, $count){

@@ -2,10 +2,17 @@
 /**
  * @version $Id$
  * @package CMSBrick
+ * @subpackage RSS
  * @copyright Copyright (C) 2008 CMSBrick. All rights reserved.
  * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
+ * @author Alexander Kuzmin (roosit@cmsbrick.ru)
  */
 
+/**
+ * RSS Grabber
+ * @package CMSBrick
+ * @subpackage RSS
+ */
 class CMSRssGrabber {
 	
 	/**
@@ -76,6 +83,11 @@ class CMSRssGrabber {
 	}
 }
 
+/**
+ * Парсер rss новостей
+ * @package CMSBrick
+ * @subpackage RSS
+ */
 class CMSRssParser {
 	public $insideItem = false;
 	public $tag = "";
