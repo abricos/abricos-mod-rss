@@ -14,6 +14,7 @@ $mod = Brick::$modules->GetModule($adress->dir[1]);
 if (empty($mod)){
 	exit;
 }
+$manager = Brick::$modules->GetModule('rss')->GetManager();
 
 $write = new CMSRssWriter2_0();
 $write->Header();

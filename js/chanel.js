@@ -5,46 +5,35 @@
 * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
 */
 
-(function(){
-	
-	Brick.namespace('mod.rss');
-
+var Component = new Brick.Component();
+Component.requires = {
+	mod:[{name: 'sys', files: ['data.js', 'form.js']}]
+};
+Component.entryPoint = function(){
 	var Dom = YAHOO.util.Dom,
 		E = YAHOO.util.Event,
-		L = YAHOO.lang,
-		T, TId;
+		L = YAHOO.lang;
+
+	var NS = this.namespace, 
+		TMG = this.template;
 	
-	var DATA;
-
-	var dateExt = Brick.dateExt;
-	var wWait = Brick.widget.WindowWait;
-	var tSetVar = Brick.util.Template.setProperty;
-	var tSetVarA = Brick.util.Template.setPropertyArray;
-
-	Brick.Loader.add({
-		mod:[{name: 'sys', files: ['data.js', 'form.js']}],
-    onSuccess: function() {
-			if (!Brick.objectExists('Brick.mod.rss.data')){
-				Brick.mod.rss.data = new Brick.util.data.byid.DataSet('rss');
-			}
-			DATA = Brick.mod.rss.data;
-
-			T = Brick.util.Template['rss']['cp_chanel'];
-			Brick.util.Template.fillLanguage(T);
-			TId = new Brick.util.TIdManager(T);
-			
-			moduleInitialize();
-			delete moduleInitialize;
-	  }
-	});
-
-var moduleInitialize = function(){
+	var API = NS.API;
+	
+	NS.data = NS.data || new Brick.util.data.byid.DataSet('rss');
+	var DATA = NS.data;
+	
 (function(){
 	
-	var Chanel = function(container){ this.init(container); };
-	Chanel.prototype = {
+	var ChanelWidget = function(container){ 
+		this.init(container); 
+	};
+	ChanelWidget.prototype = {
 		init: function(container){
-			container.innerHTML = T['panel'];
+			var TM = TMG.build('widget,table,tablesource,widget,row,rowsource'), 
+				T = TM.data, TId = TM.idManager;
+			this._TM = TM; this._T = T; this._TId = TId;
+
+			container.innerHTML = T['widget'];
 		
 			this.tables = {
 				'chanel': DATA.get('chanel', true),
@@ -61,36 +50,41 @@ var moduleInitialize = function(){
 			if (args[0].check(['source'])){ this.renderSource(); } 
 		},
 		renderChanel: function(){
+			var TM = this._TM, T = this._T, TId = this._TId;
+
 			var lst = "", di, rows = this.tables['chanel'].getRows();
-			var url = Brick.env.host+'/rss/rss/';
+			var url = '/rss/rss/';
 			rows.foreach(function(row){
 				di = row.cell;
-				lst += tSetVarA(T['row'], {
+				lst += TM.replace('row', {
 					'id': di['id'], 'nm': di['nm'], 
 					'url': url+di['id']+'/', 
 					'chm': di['chm'],
-					'chl': dateExt.convert(di['chl'])
+					'chl': Brick.dateExt.convert(di['chl'])
 				});
 			});
-			Dom.get(TId['panel']['table']).innerHTML = tSetVar(T['table'], 'rows', lst);
+			TM.getEl('widget.table').innerHTML = TM.replace('table', {'rows': lst});
 		},
 		renderSource: function(){
+			var TM = this._TM, T = this._T, TId = this._TId;
+			
 			var lst = "", di, rows = this.tables['source'].getRows();
 			rows.foreach(function(row){
 				di = row.cell;
-				lst += tSetVarA(T['rowsource'], {
+				lst += TM.replace('rowsource', {
 					'id': di['id'], 'nm': di['nm'], 'url': di['url']
 				});
 			});
-			Dom.get(TId['panel']['tablesource']).innerHTML = tSetVar(T['tablesource'], 'rows', lst);
+			TM.getEl('widget.tablesource').innerHTML = TM.replace('tablesource', {'rows': lst});
 		},
 		onClick: function(el){
+			var TId = this._TId;
 			switch(el.id){
-			case TId['panel']['addchanel']:
-				new ChanelEditor(DATA.get('chanel').newRow());
+			case TId['widget']['addchanel']:
+				new NS.ChanelEditorPanel(DATA.get('chanel').newRow());
 				return true;
-			case TId['panel']['addsource']:
-				new SourceEditor(DATA.get('source').newRow());
+			case TId['widget']['addsource']:
+				new NS.SourceEditorPanel(DATA.get('source').newRow());
 				return true;
 			}
 			var prefix = el.id.replace(/([0-9]+$)/, '');
@@ -98,7 +92,7 @@ var moduleInitialize = function(){
 			
 			switch(prefix){
 			case (TId['row']['edit']+'-'): 
-				new ChanelEditor(DATA.get('chanel').getRows().getById(numid)); 
+				new NS.ChanelEditorPanel(DATA.get('chanel').getRows().getById(numid)); 
 				return true;
 			case (TId['row']['remove']+'-'): 
 				DATA.get('chanel').getRows().getById(numid).remove();
@@ -106,7 +100,7 @@ var moduleInitialize = function(){
 				DATA.request();
 				return true;
 			case (TId['rowsource']['edit']+'-'): 
-				new SourceEditor(DATA.get('source').getRows().getById(numid)); 
+				new NS.SourceEditorPanel(DATA.get('source').getRows().getById(numid)); 
 				return true;
 			case (TId['rowsource']['remove']+'-'): 
 				DATA.get('source').getRows().getById(numid).remove();
@@ -117,23 +111,31 @@ var moduleInitialize = function(){
 			return false;
 		}
 	};
-	Brick.mod.rss.Chanel = Chanel;
-	
-	var ChanelEditor = function(row){
+	NS.ChanelWidget = ChanelWidget;
+})();
+
+(function(){
+
+	var ChanelEditorPanel = function(row){
 		this.row = row;
-		ChanelEditor.superclass.constructor.call(this, T['editorchanel']);
-	}
-	YAHOO.extend(ChanelEditor, Brick.widget.Panel, {
-		el: function(name){ return Dom.get(TId['editorchanel'][name]); },
+		ChanelEditorPanel.superclass.constructor.call(this, {
+			modal: true, fixedcenter: true
+		});
+	};
+	YAHOO.extend(ChanelEditorPanel, Brick.widget.Panel, {
+		el: function(name){ return Dom.get(this._TId['editorchanel'][name]); },
 		elv: function(name){ return Brick.util.Form.getValue(this.el(name)); },
 		setel: function(el, value){ Brick.util.Form.setValue(el, value); },
 		setelv: function(name, value){ Brick.util.Form.setValue(this.el(name), value); },
-		initTemplate: function(t){
+		initTemplate: function(){
+			var TM = TMG.build('editorchanel,option,edchtable,edchrow'), T = TM.data, TId = TM.idManager;
+			this._TM = TM; this._T = T; this._TId = TId;
+
 			var lst = "";
 			DATA.get('source').getRows().foreach(function(row){
-				lst += tSetVarA(T['option'], {'id': row.id,'nm': row.cell['nm']});
+				lst += TM.replace('option', {'id': row.id,'nm': row.cell['nm']});
 			});
-			return tSetVar(t, 'nslist', lst);
+			return TM.replace('editorchanel', {'nslist': lst});
 		},
 		onLoad: function(){
 			this.el('badd').style.display = this.row.isNew() ? '' : 'none';
@@ -157,12 +159,14 @@ var moduleInitialize = function(){
 			this.renderSourceList();
 		},
 		renderSourceList: function(){
+			var TM = this._TM, T = this._T, TId = this._TId;
+
 			var lst = "", di;
 			for (var id in this.sourcelist){
 				di = this.sourcelist[id].cell;
-				lst += tSetVarA(T['edchrow'], {'id': di['id'], 'nm': di['nm']});
+				lst += TM.replace('edchrow', {'id': di['id'], 'nm': di['nm']});
 			}
-			this.el('table').innerHTML = tSetVar(T['edchtable'], 'rows', lst);
+			this.el('table').innerHTML = TM.replace('edchtable', {'rows': lst});
 		},
 		addSource: function(){
 			var id = this.elv('newsource');
@@ -181,7 +185,7 @@ var moduleInitialize = function(){
 			this.renderSourceList();
 		},
 		onClick: function(el){
-			var tp = TId['editorchanel']; 
+			var tp = this._TId['editorchanel']; 
 			switch(el.id){
 			case tp['baddsource']: this.addSource(); return true;
 			case tp['badd']: this.save(); return true;
@@ -191,12 +195,11 @@ var moduleInitialize = function(){
 			var prefix = el.id.replace(/([0-9]+$)/, '');
 			var numid = el.id.replace(prefix, "");
 			switch(prefix){
-			case (TId['edchrow']['remove']+'-'): this.removeSource(numid); return true; 
+			case (this._TId['edchrow']['remove']+'-'): this.removeSource(numid); return true; 
 			}
 			return false;
 		},
 		save: function(){
-			this.close();
 			var row = this.row, table = DATA.get('chanel');
 			var slist = [];
 			for (var id in this.sourcelist){
@@ -217,18 +220,32 @@ var moduleInitialize = function(){
 			ctable.applyChanges();
 			
 			DATA.request();
+			this.close();
 		}
 	});
+	NS.ChanelEditorPanel = ChanelEditorPanel;
 	
-	var SourceEditor = function(row){
+})();
+
+(function(){
+
+	
+	var SourceEditorPanel = function(row){
 		this.row = row;
-		SourceEditor.superclass.constructor.call(this, T['editorsource']);
-	}
-	YAHOO.extend(SourceEditor, Brick.widget.Panel, {
-		el: function(name){ return Dom.get(TId['editorsource'][name]); },
+		SourceEditorPanel.superclass.constructor.call(this, {
+			modal: true, fixedcenter: true
+		});
+	};
+	YAHOO.extend(SourceEditorPanel, Brick.widget.Panel, {
+		el: function(name){ return Dom.get(this._TId['editorsource'][name]); },
 		elv: function(name){ return Brick.util.Form.getValue(this.el(name)); },
 		setel: function(el, value){ Brick.util.Form.setValue(el, value); },
 		setelv: function(name, value){ Brick.util.Form.setValue(this.el(name), value); },
+		initTemplate: function(){
+			var TM = TMG.build('editorsource'), T = TM.data, TId = TM.idManager;
+			this._TM = TM; this._T = T; this._TId = TId;
+			return T['editorsource'];
+		},
 		onLoad: function(){
 			var di = this.row.cell;
 			this.setelv('nm', di['nm']);
@@ -239,16 +256,15 @@ var moduleInitialize = function(){
 			this.el('bsave').style.display = this.row.isNew() ? 'none' : '';
 		},
 		onClick: function(el){
-			var tp = TId['editorsource']; 
+			var tp = this._TId['editorsource']; 
 			switch(el.id){
-			case tp['badd']: this.save(); return true;
+			case tp['badd']: 
 			case tp['bsave']: this.save(); return true;
 			case tp['bcancel']: this.close(); return true;
 			}
 			return false;
 		},
 		save: function(){
-			this.close();
 			var row = this.row, table = DATA.get('source');
 			row.update({
 				'nm': this.elv('nm'),
@@ -259,10 +275,10 @@ var moduleInitialize = function(){
 			if (row.isNew()){ table.getRows().add(row); }
 			table.applyChanges();
 			DATA.request();
+			this.close();
 		}
 	});
-
-
+	NS.SourceEditorPanel = SourceEditorPanel;
+	
 })();
 };
-})();

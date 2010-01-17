@@ -69,6 +69,11 @@ if ($updateManager->isInstall()){
 		  PRIMARY KEY  (`recordid`)
 		 )".$charset
 	);
-
+	
+	if ($updateManager->isInstall() || $updateManager->serverVersion == '1.0.1'){
+		
+		CMSRegistry::$instance->modules->GetModule('rss')->permission->InstallDefault();
+		
+	}
 }
 ?>

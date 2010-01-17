@@ -1,0 +1,29 @@
+<!--{manager}-->
+<div id="{i#id}" class="yui-navset">
+	<ul class="yui-nav">
+		<li class="selected"><a href="#{i#config}"><em>{#rss.manager.panel.title}</em></a></li>
+		<li><a href="#{i#chanel}"><em>{#rss.manager.panel.title2}</em></a></li>
+	</ul>            
+  <div class="yui-content">
+	  <div id="{i#config}"></div>
+	  <div id="{i#chanel}"></div>
+	</div>
+</div>
+
+<!--{config}-->
+<div class="field linespace-1">
+	<h3>{#rss.config.panel.hd}</h3>
+	<p>
+		{#rss.config.panel.hd2}
+		<select id="{i#default}"></select>
+	</p>
+</div>
+<div class="buttons-top right">
+	<input id='{i#bsave}' type="button" value="{#rss.config.panel.bsave}" />
+</div>
+
+<!--{configoptionmod}-->
+<option value="">{#rss.config.optionmod_dontuse}</option>
+
+<!--{configoption}-->
+<option value="{v#id}">{v#tl}</option>
