@@ -83,8 +83,8 @@ class RSSManager {
 				}
 				return $arr;
 			case 'config':
-				Brick::$builder->phrase->PreloadByModule($tsrs->p->mod);
-				return Brick::$builder->phrase->GetArray($tsrs->p->mod);
+				Brick::$builder->phrase->PreloadByModule($p->mod);
+				return Brick::$builder->phrase->GetArray($p->mod);
 			case 'chanel':
 				return CMSQRss::ChanelList(Brick::$db);
 			case 'source':
