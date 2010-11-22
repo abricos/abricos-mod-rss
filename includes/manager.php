@@ -1,6 +1,6 @@
 <?php
 /**
- * @version $Id: manager.php 183 2009-11-20 13:16:15Z roosit $
+ * @version $Id$
  * @package Abricos
  * @subpackage RSS
  * @copyright Copyright (C) 2008 Abricos. All rights reserved.
@@ -8,94 +8,197 @@
  * @author Alexander Kuzmin (roosit@abricos.org)
  */
 
-class RSSManager {
+require_once 'dbquery.php';
+
+class RSSManager extends ModuleManager {
 	
 	/**
 	 * 
-	 * @var CMSModuleRss
+	 * @var RSSModule
 	 */
 	public $module = null;
 	
 	/**
-	 * 
-	 * @var CMSDatabase
+	 * User
+	 * @var User
 	 */
-	public $db = null;
-	
 	public $user = null;
+	public $userid = 0;
 	
-	public function RSSManager(CMSModuleRss $module){
+	public function RSSManager(RSSModule $module){
+		parent::ModuleManager($module);
 		
-		$this->module = $module;
-		$this->db = $module->registry->db;
-		
-		$this->user = $module->registry->session->userinfo;
+		$this->user = CMSRegistry::$instance->modules->GetModule('user');
+		$this->userid = $this->user->info['userid'];
 	}
-	/*
+	
+	
 	public function IsAdminRole(){
-		return $this->module->permission->CheckAction(CompanyAction::COMPANY_ADMIN) > 0;
+		return $this->module->permission->CheckAction(RSSAction::ADMIN) > 0;
+	}
+	
+	public function IsManagerRole(){
+		return $this->module->permission->CheckAction(RSSAction::MANAGER) > 0;
 	}
 	
 	public function IsViewRole(){
-		return $this->module->permission->CheckAction(CompanyAction::COMPANY_VIEW) > 0;
+		return $this->module->permission->CheckAction(RSSAction::VIEW) > 0;
 	}
-	/**/
 	
 	public function DSProcess($name, $rows){
 		$p = $rows->p;
 		switch ($name){
 			case 'config':
-				Brick::$builder->phrase->PreloadByModule($p->mod);
 				foreach ($rows->r as $r){
-					if ($r->f=='u'){ Brick::$builder->phrase->Set($p->mod, $r->d->nm, $r->d->ph); }
+					if ($r->f=='u'){ $this->ConfigUpdate($p->mod, $r->d->nm, $r->d->ph); }
 				}
-				Brick::$builder->phrase->Save();
 				break;
 			case 'chanel':
 				foreach ($rows->r as $r){
-					if ($r->f=='a'){ CMSQRss::ChanelAppend(Brick::$db, $r->d); }
-					if ($r->f=='u'){ CMSQRss::ChanelUpdate(Brick::$db, $r->d); }
-					if ($r->f=='d'){ CMSQRss::ChanelRemove(Brick::$db, $r->d->id); }
+					if ($r->f=='a'){ $this->ChanelAppend($r->d); }
+					if ($r->f=='u'){ $this->ChanelUpdate($r->d); }
+					if ($r->f=='d'){ $this->ChanelRemove($r->d->id); }
 				}
 				break;
 			case 'source':
 				foreach ($rows->r as $r){
-					if ($r->f=='a'){ CMSQRss::SourceAppend(Brick::$db, $r->d); }
-					if ($r->f=='u'){ CMSQRss::SourceUpdate(Brick::$db, $r->d); }
-					if ($r->f=='d'){ CMSQRss::SourceRemove(Brick::$db, $r->d->id); }
+					if ($r->f=='a'){ $this->SourceAppend($r->d); }
+					if ($r->f=='u'){ $this->SourceUpdate($r->d); }
+					if ($r->f=='d'){ $this->SourceRemove($r->d->id); }
 				}
 				break;
 		}
 	}
-	
+		
 	public function DSGetData($name, $rows){
 		$p = $rows->p;
 		switch ($name){
-			case 'modules':
-				Brick::$modules->RegisterAllModule();
-				$arr = array();
-				foreach (Brick::$modules->table as $childmod){
-					if (method_exists($childmod, 'RssMetaLink')){
-						$row = array();
-						$row['nm'] = $childmod->name;
-						array_push($arr, $row);
-					}
-				}
-				return $arr;
-			case 'config':
-				Brick::$builder->phrase->PreloadByModule($p->mod);
-				return Brick::$builder->phrase->GetArray($p->mod);
-			case 'chanel':
-				return CMSQRss::ChanelList(Brick::$db);
-			case 'source':
-				return CMSQRss::SourceList(Brick::$db);
-			case 'chanelsource':
-				return CMSQRss::ChanelSourceList(Brick::$db);
+			case 'modules': return $this->ModuleList();
+			case 'config': return $this->Config($p->mod);
+			case 'chanel': return $this->ChanelList();
+			case 'source': return $this->SourceList();
+			case 'chanelsource': return $this->ChanelSourceList();
+			case 'record': return $this->RecordList($p->chanelid);
+			case 'online': return $this->Online();
 		}
 		
 		return null;
 	}
 	
+	public function ChanelAppend($d){
+		if (!$this->IsAdminRole()){ return; }
+		return RSSQuery::ChanelAppend($this->db, $d); 
+	}
+	
+	public function ChanelUpdate($d){
+		if (!$this->IsAdminRole()){ return; }
+		 RSSQuery::ChanelUpdate($this->db, $d);
+	}
+	
+	public function ChanelRemove($chanelid){
+		if (!$this->IsAdminRole()){ return; }
+		RSSQuery::ChanelRemove($this->db, $chanelid);
+	}
+
+	public function SourceAppend($d){
+		if (!$this->IsAdminRole()){ return; }
+		return RSSQuery::SourceAppend($this->db, $d);
+	}
+	
+	public function SourceUpdate($d){
+		if (!$this->IsAdminRole()){ return; }
+		RSSQuery::SourceUpdate($this->db, $d);
+	}
+	
+	public function SourceRemove($sourceid){
+		if (!$this->IsAdminRole()){ return; }
+		RSSQuery::SourceRemove($this->db, $sourceid);
+	}
+	
+	public function ModuleList(){
+		if (!$this->IsAdminRole()){ return; }
+		$modules = CMSRegistry::$instance->modules;
+		$modules->RegisterAllModule();
+		$arr = array();
+		foreach ($modules->table as $childmod){
+			if (!method_exists($childmod, 'RssMetaLink')){
+				continue;
+			}
+			$row = array();
+			$row['nm'] = $childmod->name;
+			array_push($arr, $row);
+		}
+		return $arr;
+	}
+	
+	public function Config($mod){
+		if (!$this->IsAdminRole()){ return; }
+		Brick::$builder->phrase->PreloadByModule($mod);
+		return Brick::$builder->phrase->GetArray($mod);
+	}
+	
+	public function ConfigUpdate($mod, $name, $value){
+		if (!$this->IsAdminRole()){ return; }
+		Brick::$builder->phrase->PreloadByModule($mod);
+		Brick::$builder->phrase->Set($mod, $name, $value);
+		Brick::$builder->phrase->Save();
+	}
+	
+	public function ChanelList(){
+		if (!$this->IsViewRole()){ return; }
+		return RSSQuery::ChanelList($this->db);
+	}
+	
+	public function SourceList(){
+		if (!$this->IsAdminRole()){ return; }
+		return RSSQuery::SourceList($this->db);		
+	}
+
+	public function ChanelSourceList(){
+		if (!$this->IsAdminRole()){ return; }
+		return RSSQuery::ChanelSourceList($this->db);
+	}
+	
+	
+	public function RSSWrite($writer, $chanelid) {
+		$rows = $this->RecordList($chanelid);
+		while (($row = $this->db->fetch_array($rows))) {
+			$title = $row['tl'];
+			if (!empty($row['pfx'])){
+				$title = $row['pfx'].": ".$title;
+			}
+			$item = new CMSRssWriter2_0Item($title, $row['lnk'], $row['body']);
+			$item->pubDate = $row['pdt'];
+			$writer->WriteItem($item);
+		}
+	}
+	
+	private function Grabber($chanel){
+		require_once 'grabber.php';
+		$grabber = new RSSGrabber($chanel);
+	}
+	
+	public function RecordList($chanelid){
+		if (!$this->IsViewRole()){ return; }
+		$chanel = RSSQuery::Chanel ($this->db, $chanelid);
+		if (empty($chanel)){
+			$chanel = RSSQuery::ChanelFirst($this->db);
+		}
+		if (empty($chanel)){ return; }
+		
+		$this->Grabber($chanel);
+		
+		return RSSQuery::RecordList($this->db, $chanelid, $chanel['gcnt']);
+	}
+	
+	public function Online(){
+		if (!$this->IsViewRole()){ return; }
+		$chanels = RSSQuery::ChanelList($this->db);
+		while (($chanel = $this->db->fetch_array($chanels))) {
+			$this->Grabber($chanel);
+		}
+		return RSSQuery::RecordList($this->db, 0, 10);
+	}
 }
 
 
@@ -189,267 +292,6 @@ class CMSRssWriter2_0 {
 	}
 }
 
-/**
- * Статичные функции запросов к базе данных
- * @package Abricos
- * @subpackage RSS
- */
-class CMSQRss {
-	
-	public static function RecordList(CMSDatabase $db, $chanelid, $count){
-		$sql = "
-			SELECT 
-				b.recordid as id,
-				b.title as tl,
-				b.link as lnk,
-				b.body as body,
-				b.pubdate as pdt,
-				c.prefix as pfx
-			FROM ".$db->prefix."rss_chanelsource a
-			LEFT JOIN ".$db->prefix."rss_record b ON a.sourceid=b.sourceid
-			LEFT JOIN ".$db->prefix."rss_source c ON a.sourceid=c.sourceid
-			WHERE a.chanelid=".bkint($chanelid)."
-			ORDER BY pdt DESC
-			LIMIT ".bkint($count)."
-		";
-		return $db->query_read($sql);
-	}
-
-	public static function RecordCheck(CMSDatabase $db, $sourceid, $link){
-		$sql = "
-			SELECT recordid 
-			FROM ".$db->prefix."rss_record
-			WHERE sourceid=".bkint($sourceid)." AND link='".bkstr($link)."'
-			LIMIT 1
-		";
-		$row = $db->query_first($sql);
-		return !empty($row);
-	}
-	
-	public static function RecordAppend(CMSDatabase $db, $sourceid, $link, $title, $body, $author, $pubdate, $category=''){
-		if (CMSQRss::RecordCheck($db, $sourceid, $link)){ return; }
-		$sql = "
-			INSERT INTO ".$db->prefix."rss_record
-			(sourceid, link, title, body, author, pubdate, category) VALUES 
-			(
-				'".bkint($sourceid)."',
-				'".bkstr($link)."',
-				'".bkstr($title)."',
-				'".bkstr($body)."',
-				'".bkstr($author)."',
-				'".bkint($pubdate)."',
-				'".bkstr($category)."'
-			)
-		";
-		$db->query_write($sql);
-	}
-	
-	public static function ChanelSourceRemoveSource(CMSDatabase $db, $sourceid){
-		$sql = "
-			DELETE FROM ".$db->prefix."rss_chanelsource
-			WHERE sourceid=".bkint($sourceid)." 
-		";
-		$db->query_write($sql);
-	}
-	
-	public static function ChanelSourceRemove(CMSDatabase $db, $chanelid){
-		$sql = "
-			DELETE FROM ".$db->prefix."rss_chanelsource
-			WHERE chanelid=".bkint($chanelid)." 
-		";
-		$db->query_write($sql);
-	}
-	
-	public static function ChanelSourceUpdateFromArray(CMSDatabase $db, $chanelid, $sourceids){
-		CMSQRss::ChanelSourceRemove($db, $chanelid);
-		$arr = array();
-		foreach ($sourceids as $id){
-			array_push($arr, "(".bkint($chanelid).", ".bkint($id).")");
-		}
-		if (empty($arr)){ return; }
-		$sql = "
-			INSERT INTO ".$db->prefix."rss_chanelsource
-			(chanelid, sourceid) VALUES
-			".implode(',', $arr)." 
-		";
-		$db->query_write($sql);
-	}
-	
-	public static function ChanelSourceList(CMSDatabase $db){
-		$sql = "
-			SELECT 
-				chanelsourceid as id,
-				chanelid as cid,
-				sourceid as sid
-			FROM ".$db->prefix."rss_chanelsource
-		";
-		return $db->query_read($sql);
-	}
-	
-	public static function SourceRemove(CMSDatabase $db, $sourceid){
-		$sql = "
-			DELETE FROM ".$db->prefix."rss_source
-			WHERE sourceid=".bkint($sourceid)." 
-		";
-		$db->query_write($sql);
-		CMSQRss::ChanelSourceRemoveSource($db, $sourceid);
-	}
-	
-	public static function SourceUpdate(CMSDatabase $db, $data){
-		$sql = "
-			UPDATE ".$db->prefix."rss_source
-			SET
-				name='".bkstr($data->nm)."',
-				descript='".bkstr($data->dsc)."',
-				url='".bkstr($data->url)."',
-				prefix='".bkstr($data->pfx)."'
-			WHERE sourceid=".bkint($data->id)." 
-		";
-		$db->query_write($sql);
-	}
-	
-	public static function SourceAppend(CMSDatabase $db, $data){
-		$sql = "
-			INSERT INTO ".$db->prefix."rss_source
-			(name, descript, url, prefix, dateline) VALUES 
-			(
-				'".bkstr($data->nm)."',
-				'".bkstr($data->dsc)."',
-				'".bkstr($data->url)."',
-				'".bkstr($data->pfx)."',
-				".TIMENOW."
-			)
-		";
-		$db->query_write($sql);
-	}
-	
-	public static function SourceList(CMSDatabase $db){
-		$sql = "
-			SELECT 
-				sourceid as id,
-				name as nm,
-				descript as dsc,
-				url,
-				prefix as pfx
-			FROM ".$db->prefix."rss_source
-		";
-		return $db->query_read($sql);
-	}
-	
-	public static function SourceListByChanelId(CMSDatabase $db, $chanelid){
-		$sql = "
-			SELECT 
-				b.sourceid as id,
-				b.name as nm,
-				b.descript as dsc,
-				b.url,
-				b.prefix as pfx
-			FROM ".$db->prefix."rss_chanelsource a
-			LEFT JOIN ".$db->prefix."rss_source b ON a.sourceid=b.sourceid
-			WHERE a.chanelid=".bkint($chanelid)."
-		";
-		return $db->query_read($sql);
-	}
-	
-	public static function ChanelRemove(CMSDatabase $db, $chanelid){
-		$sql = "
-			DELETE FROM ".$db->prefix."rss_chanel
-			WHERE chanelid=".bkint($chanelid)." 
-		";
-		$db->query_write($sql);
-		CMSQRss::ChanelSourceRemove($db, $chanelid);
-	}
-	
-	public static function ChanelUpdate(CMSDatabase $db, $data){
-		$sql = "
-			UPDATE ".$db->prefix."rss_chanel
-			SET
-				name='".bkstr($data->nm)."',
-				descript='".bkstr($data->dsc)."',
-				checkmin=".bkint($data->chm).",
-				getcount=".bkint($data->gcnt)."
-			WHERE chanelid=".bkint($data->id)." 
-		";
-		$db->query_write($sql);
-		CMSQRss::ChanelSourceUpdateFromArray($db, $data->id, $data->sourcelist);
-	}
-	
-	public static function ChanelUpdateLastGrabber(CMSDatabase $db, $chanelid, $checktime){
-		$sql = "
-			UPDATE ".$db->prefix."rss_chanel
-			SET lastcheck=".bkint($checktime)."
-			WHERE chanelid=".bkint($chanelid)." 
-		";
-		$db->query_write($sql);
-	}
-	
-	public static function ChanelAppend(CMSDatabase $db, $data){
-		$sql = "
-			INSERT INTO ".$db->prefix."rss_chanel
-			(name, descript, checkmin, getcount, dateline) VALUES 
-			(
-				'".bkstr($data->nm)."',
-				'".bkstr($data->dsc)."',
-				".bkint($data->chm).",
-				".bkint($data->gcnt).",
-				".TIMENOW."
-			)
-		";
-		$db->query_write($sql);
-		$id = $db->insert_id();
-		CMSQRss::ChanelSourceUpdateFromArray($db, $id, $data->sourcelist);
-	}
-	
-	public static function ChanelList(CMSDatabase $db){
-		$sql = "
-			SELECT
-				chanelid as id, 
-				name as nm,
-				descript as dsc,
-				checkmin as chm,
-				lastcheck as chl,
-				getcount as gcnt,
-				disabled as off
-			FROM ".$db->prefix."rss_chanel
-			ORDER BY name
-		";
-		return $db->query_read($sql);
-	}
-	
-	public static function Chanel(CMSDatabase $db, $chanelid){
-		$sql = "
-			SELECT
-				chanelid as id, 
-				name as nm,
-				descript as dsc,
-				checkmin as chm,
-				lastcheck as chl,
-				getcount as gcnt,
-				disabled as off
-			FROM ".$db->prefix."rss_chanel
-			WHERE chanelid=".bkint($chanelid)."
-			LIMIT 1
-		";
-		return $db->query_first($sql);
-	}
-	
-	public static function ChanelFirst(CMSDatabase $db){
-		$sql = "
-			SELECT
-				chanelid as id, 
-				name as nm,
-				descript as dsc,
-				checkmin as chm,
-				lastcheck as chl,
-				getcount as gcnt,
-				disabled as off
-			FROM ".$db->prefix."rss_chanel
-			ORDER BY chanelid
-			LIMIT 1
-		";
-		return $db->query_first($sql);
-	}
-}
 
 
 ?>

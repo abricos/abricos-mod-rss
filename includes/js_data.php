@@ -8,8 +8,6 @@
  * @author Alexander Kuzmin (roosit@abricos.org)
  */
 
-if (!Brick::$session->IsAdminMode()){ return; }
-
 $brick = Brick::$builder->brick;
 $mod = Brick::$modules->GetModule('sys');
 $rssManager = Brick::$modules->GetModule('rss')->GetManager();
@@ -55,52 +53,4 @@ foreach ($ds->ts as $ts){
 $brick->param->var['obj'] = json_encode($ret);
 
 
-/*
-$brick = Brick::$builder->brick;
-
-$mod = Brick::$modules->GetModule('sys');
-$ds = $mod->getDataSet();
-
-$ret = new stdClass();
-$ret->_ds = array();
-
-// Первым шагом необходимо выполнить все комманды по обновлению таблиц
-foreach ($ds->ts as $ts){
-	foreach ($ts->rs as $tsrs){
-		if (empty($tsrs->r)){ continue; }
-	}
-}
-
-// Вторым шагом выдать запрашиваемые таблицы 
-foreach ($ds->ts as $ts){
-	$table = new stdClass();
-	$table->nm = $ts->nm;
-	// нужно ли запрашивать колонки таблицы
-	$qcol = false;
-	foreach($ts->cmd as $cmd){ if ($cmd == 'i'){ $qcol = true; } }
-	
-	$table->rs = array();
-	foreach ($ts->rs as $tsrs){
-		$rows = null;
-		if (!is_null($rows)){
-			if ($qcol){
-				$table->cs = $mod->columnToObj($rows);
-				$qcol = false;
-			}
-			$rs = new stdClass();
-			$rs->p = $tsrs->p;
-			if (is_array($rows)){
-				$rs->d = $rows;
-			}else{
-				$rs->d = $mod->rowsToObj($rows);
-			}
-			array_push($table->rs, $rs);
-		}
-	}
-	
-	array_push($ret->_ds, $table);
-}
-
-$brick->param->var['obj'] = json_encode($ret);
-/**/
 ?>

@@ -10,7 +10,7 @@
  * @author Alexander Kuzmin (roosit@abricos.org)
  */
 
-$modRss = new CMSModuleRss();
+$modRss = new RSSModule();
 CMSRegistry::$instance->modules->Register($modRss);
 
 /**
@@ -20,18 +20,21 @@ CMSRegistry::$instance->modules->Register($modRss);
  * @package Abricos
  * @subpackage RSS
  */
-class CMSModuleRss extends CMSModule {
+class RSSModule extends CMSModule {
 	
 	private $_manager = null;
 	
 	public function __construct(){
-		$this->version = "0.2.1";
+		$this->version = "0.2.2.1";
 		$this->name = "rss";
 		$this->takelink = "rss";
 		
 		$this->permission = new RSSPermission($this);
 	}
 	
+	/**
+	 * @return RSSManager
+	 */
 	public function GetManager(){
 		if (is_null($this->_manager)){
 			require_once CWD.'/modules/rss/includes/manager.php';
@@ -45,45 +48,41 @@ class CMSModuleRss extends CMSModule {
 	}
 	
 	public function RssWrite(CMSRssWriter2_0 $writer){
-		require_once CWD.'/modules/rss/includes/grabber.php';
-		
 		$chanelid = $this->registry->adress->dir[2];
-		
-		$chanel = CMSQRss::Chanel ($this->registry->db, $chanelid);
-		if (empty($chanel)){
-			$chanel = CMSQRss::ChanelFirst($this->registry->db);
-		}
-		$grabber = new CMSRssGrabber($writer, $chanel);
-		$grabber->Write();
+		$manager = $this->GetManager();
+		$manager->RSSWrite($writer, $chanelid);
 	}
 	
 }
 
 class RSSAction {
-	const RSS_VIEW = 10;
-	const RSS_MANAGER = 30;
-	const RSS_ADMIN = 50;
+	const VIEW = 10;
+	const MANAGER = 30;
+	const ADMIN = 50;
 }
 
 class RSSPermission extends CMSPermission {
 	
-	public function RSSPermission(CMSModuleRss $module){
+	public function RSSPermission(RSSModule $module){
 		
 		$defRoles = array(
-			new CMSRole(RSSAction::RSS_VIEW, 1, USERGROUPID_ALL),
-			new CMSRole(RSSAction::RSS_MANAGER, 1, USERGROUPID_REGISTERED),
-			new CMSRole(RSSAction::RSS_ADMIN, 1, USERGROUPID_ADMINISTRATOR)
+			new CMSRole(RSSAction::VIEW, 1, User::UG_GUEST),
+			new CMSRole(RSSAction::VIEW, 1, User::UG_REGISTERED),
+			new CMSRole(RSSAction::VIEW, 1, User::UG_ADMIN),
+			
+			new CMSRole(RSSAction::MANAGER, 1, User::UG_ADMIN),
+			new CMSRole(RSSAction::ADMIN, 1, User::UG_ADMIN)
 		);
 		
 		parent::CMSPermission($module, $defRoles);
 	}
 	
 	public function GetRoles(){
-		$roles = array();
-		$roles[RSSAction::RSS_VIEW] = $this->CheckAction(RSSAction::RSS_VIEW);
-		$roles[RSSAction::RSS_MANAGER] = $this->CheckAction(RSSAction::RSS_MANAGER);
-		$roles[RSSAction::RSS_ADMIN] = $this->CheckAction(RSSAction::RSS_ADMIN);
-		return $roles;
+		return array(
+			RSSAction::VIEW => $this->CheckAction(RSSAction::VIEW),
+			RSSAction::MANAGER => $this->CheckAction(RSSAction::MANAGER),
+			RSSAction::ADMIN => $this->CheckAction(RSSAction::ADMIN)
+		);
 	}
 }
 

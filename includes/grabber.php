@@ -13,7 +13,7 @@
  * @package Abricos 
  * @subpackage RSS
  */
-class CMSRssGrabber {
+class RSSGrabber {
 	
 	/**
 	 * Ядро
@@ -23,35 +23,27 @@ class CMSRssGrabber {
 	public $registry = null;
 	
 	/**
-	 * 
-	 * @var CMSRssWriter2_0
+	 * @var CMSDatabase
 	 */
-	public $writer = null;
+	public $db = null;
 	
 	public $chanelid = 0;
 	
 	public $chanel = null;
 	
-	public function __construct(CMSRssWriter2_0 $writer, $chanel) {
+	/**
+	 * @var RSSManager
+	 */
+	public $manager = null;
+	
+	
+	public function __construct($chanel) {
 		$this->registry = CMSRegistry::$instance;
-		$this->writer = $writer;
 		$this->chanelid = $chanel['id'];
 		$this->chanel = $chanel;
-	}
-	
-	public function Write() {
-		if (is_null($this->chanel)) { return; }
+		$this->module = CMSRegistry::$instance->modules->GetModule('rss')->GetManager();
+		$this->db = $this->registry->db;
 		$this->Grabber();
-		$rows = CMSQRss::RecordList($this->registry->db, $this->chanelid, $this->chanel['gcnt']);
-		while (($row = $this->registry->db->fetch_array($rows))) {
-			$title = $row['tl'];
-			if (!empty($row['pfx'])){
-				$title = $row['pfx'].": ".$title;
-			}
-			$item = new CMSRssWriter2_0Item($title, $row['lnk'], $row['body']);
-			$item->pubDate = $row['pdt'];
-			$this->writer->WriteItem($item);
-		}
 	}
 	
 	private function Grabber() {
@@ -59,16 +51,16 @@ class CMSRssGrabber {
 		$sec = $chanel ['chm'] * 60;
 		$lastupdate = $chanel ['chl'] * 1;
 		if ($lastupdate > 0 && TIMENOW - $sec < $lastupdate) { return; }
-		$rows = CMSQRss::SourceListByChanelId($this->registry->db, $this->chanelid);
-		while (($row = $this->registry->db->fetch_array($rows))) {
+		$rows = RSSQuery::SourceListByChanelId($this->db, $this->chanelid);
+		while (($row = $this->db->fetch_array($rows))) {
 			$this->GrabberSource($row);
 		}
-		CMSQRss::ChanelUpdateLastGrabber($this->registry->db, $chanel['id'], TIMENOW);
+		RSSQuery::ChanelUpdateLastGrabber($this->db, $chanel['id'], TIMENOW);
 	}
 	
 	private function GrabberSource($source) {
 		$xml_parser = xml_parser_create("UTF-8");
-		$rss_parser = new CMSRssParser($this->registry, $source);
+		$rss_parser = new RSSParser($this->registry, $source);
 
 		xml_set_object($xml_parser, $rss_parser);
 		xml_set_element_handler($xml_parser, "startElement", "endElement" );
@@ -88,7 +80,8 @@ class CMSRssGrabber {
  * @package Abricos
  * @subpackage RSS
  */
-class CMSRssParser {
+class RSSParser {
+	
 	public $insideItem = false;
 	public $tag = "";
 	public $title = "";
@@ -118,7 +111,7 @@ class CMSRssParser {
 	public function endElement($parser, $tagName) {
 		if ($tagName == "ITEM") {
 			$pubdate = strtotime($this->dt);
-			CMSQRss::RecordAppend($this->db, $this->source['id'], $this->originalLink, $this->title, $this->description, '', $pubdate, '');
+			RSSQuery::RecordAppend($this->db, $this->source['id'], $this->originalLink, $this->title, $this->description, '', $pubdate, '');
 			$this->title = "";
 			$this->originalLink = "";
 			$this->description = "";

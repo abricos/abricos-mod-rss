@@ -14,6 +14,10 @@ $updateManager = CMSRegistry::$instance->modules->updateManager;
 $db = CMSRegistry::$instance->db;
 $pfx = $db->prefix;
 
+if ($updateManager->serverVersion == '1.0.1'){
+	$updateManager->serverVersion = '0.2.1';
+}
+
 if ($updateManager->isInstall()){
 	// RSS канал
 	$db->query_write("
@@ -66,14 +70,54 @@ if ($updateManager->isInstall()){
 		  `author` varchar(50) NOT NULL default '' COMMENT 'Автор',
 		  `category` varchar(50) NOT NULL default '' COMMENT 'Категория',
 		  `pubdate` int(10) unsigned NOT NULL default '0' COMMENT 'Дата публикации',
-		  PRIMARY KEY  (`recordid`)
+		  PRIMARY KEY (`recordid`)
+		 )".$charset
+	);
+}
+
+if ($updateManager->isUpdate('0.2.2.1')){
+	CMSRegistry::$instance->modules->GetModule('rss')->permission->Install();
+}
+
+if ($updateManager->isUpdate('0.2.2.2')){
+	
+	require_once 'dbquery.php';
+	
+	
+	// принадлежность записи к источнику
+	$db->query_write("
+		CREATE TABLE IF NOT EXISTS ".$pfx."rss_sourcerecord (
+		  `sourcerecordid` int(10) unsigned NOT NULL auto_increment,
+		  `sourceid` int(10) unsigned NOT NULL default '0' COMMENT 'Идентификатор источника',
+		  `recordid` int(10) unsigned NOT NULL default '0' COMMENT 'Идентификатор канала',
+		  PRIMARY KEY  (`sourcerecordid`),
+		  KEY `sourceid` (`sourceid`),
+		  UNIQUE KEY `sourcerecord` (`sourceid`, `recordid`)
 		 )".$charset
 	);
 	
-	if ($updateManager->isInstall() || $updateManager->serverVersion == '1.0.1'){
-		
-		CMSRegistry::$instance->modules->GetModule('rss')->permission->InstallDefault();
-		
+	$slist = $db->query_read("
+		SELECT 
+			sourceid as id
+		FROM ".$db->prefix."rss_source
+	");
+	while (($source = $this->db->fetch_array($slist))) {
+		$rlist = $db->query_read("
+			SELECT 
+				b.recordid as id,
+				b.title as tl,
+				b.link as lnk,
+				b.body as body,
+				b.pubdate as pdt
+			FROM ".$db->prefix."rss_record b
+			WHERE b.sourceid=".bkint($source['id'])."
+		");
+		while (($r = $this->db->fetch_array($rlist))) {
+			RSSQuery::RecordAppend($db, $source['id'], $r['lnk'], $r['tl'], $r['body'], '', $r['pdt']);
+		}
 	}
+	
+	$db->query_write("ALTER TABLE `".$pfx."rss_record` DROP sourceid");
+	$db->query_write("ALTER TABLE `".$pfx."rss_record` ADD UNIQUE KEY `link` ( `link` )");
 }
 ?>
