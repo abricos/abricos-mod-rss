@@ -17,8 +17,8 @@ Component.entryPoint = function(){
 	
 	var cp = Brick.mod.user.cp;
 	var menuItem = new cp.MenuItem(this.moduleName);
-	menuItem.icon = '/modules/sys/images/cp_icon.gif';
-	menuItem.titleId = 'rss.cp.title';
+	menuItem.icon = '/modules/rss/images/rss-icon-16px.gif';
+	menuItem.titleId = 'mod.rss.cp.title';
 	menuItem.entryComponent = 'api';
 	menuItem.entryPoint = 'Brick.mod.rss.API.showRSSManagerWidget';
 	
