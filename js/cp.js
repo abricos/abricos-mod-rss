@@ -16,12 +16,12 @@ Component.entryPoint = function(){
 	if (!Brick.env.user.isAdmin()){ return; }
 	
 	var cp = Brick.mod.user.cp;
-	
 	var menuItem = new cp.MenuItem(this.moduleName);
 	menuItem.icon = '/modules/sys/images/cp_icon.gif';
-	menuItem.titleId = 'rss.admin.cp.title';
+	menuItem.titleId = 'rss.cp.title';
 	menuItem.entryComponent = 'api';
 	menuItem.entryPoint = 'Brick.mod.rss.API.showRSSManagerWidget';
 	
 	cp.MenuManager.add(menuItem);
+	
 };
