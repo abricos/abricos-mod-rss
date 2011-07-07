@@ -10,9 +10,6 @@
  * @author Alexander Kuzmin (roosit@abricos.org)
  */
 
-$modRss = new RSSModule();
-CMSRegistry::$instance->modules->Register($modRss);
-
 /**
  * Модуль "RSS"
  * формат запроса http://domain.com/rss/{имя модуля}/{параметры}
@@ -86,5 +83,7 @@ class RSSPermission extends CMSPermission {
 	}
 }
 
+$modRss = new RSSModule();
+CMSRegistry::$instance->modules->Register($modRss);
 
 ?>
