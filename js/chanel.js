@@ -118,11 +118,9 @@ Component.entryPoint = function(){
 
 	var ChanelEditorPanel = function(row){
 		this.row = row;
-		ChanelEditorPanel.superclass.constructor.call(this, {
-			modal: true, fixedcenter: true
-		});
+		ChanelEditorPanel.superclass.constructor.call(this);
 	};
-	YAHOO.extend(ChanelEditorPanel, Brick.widget.Panel, {
+	YAHOO.extend(ChanelEditorPanel, Brick.widget.Dialog, {
 		el: function(name){ return Dom.get(this._TId['editorchanel'][name]); },
 		elv: function(name){ return Brick.util.Form.getValue(this.el(name)); },
 		setel: function(el, value){ Brick.util.Form.setValue(el, value); },
@@ -232,11 +230,9 @@ Component.entryPoint = function(){
 	
 	var SourceEditorPanel = function(row){
 		this.row = row;
-		SourceEditorPanel.superclass.constructor.call(this, {
-			modal: true, fixedcenter: true
-		});
+		SourceEditorPanel.superclass.constructor.call(this);
 	};
-	YAHOO.extend(SourceEditorPanel, Brick.widget.Panel, {
+	YAHOO.extend(SourceEditorPanel, Brick.widget.Dialog, {
 		el: function(name){ return Dom.get(this._TId['editorsource'][name]); },
 		elv: function(name){ return Brick.util.Form.getValue(this.el(name)); },
 		setel: function(el, value){ Brick.util.Form.setValue(el, value); },
