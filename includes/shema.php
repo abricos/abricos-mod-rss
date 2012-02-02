@@ -10,8 +10,8 @@
  */
 
 $charset = "CHARACTER SET 'utf8' COLLATE 'utf8_general_ci'";
-$updateManager = CMSRegistry::$instance->modules->updateManager; 
-$db = CMSRegistry::$instance->db;
+$updateManager = Ab_UpdateManager::$current; 
+$db = Abricos::$db;
 $pfx = $db->prefix;
 
 if ($updateManager->serverVersion == '1.0.1'){
@@ -76,9 +76,9 @@ if ($updateManager->isInstall()){
 }
 
 if ($updateManager->isUpdate('0.2.2.1')){
-	CMSRegistry::$instance->modules->GetModule('rss')->permission->Install();
+	Abricos::GetModule('rss')->permission->Install();
 }
-
+/*
 if ($updateManager->isUpdate('0.2.2.2')){
 	
 	require_once 'dbquery.php';
@@ -120,4 +120,5 @@ if ($updateManager->isUpdate('0.2.2.2')){
 	$db->query_write("ALTER TABLE `".$pfx."rss_record` DROP sourceid");
 	$db->query_write("ALTER TABLE `".$pfx."rss_record` ADD UNIQUE KEY `link` ( `link` )");
 }
+/**/
 ?>

@@ -23,7 +23,7 @@ class RSSGrabber {
 	public $registry = null;
 	
 	/**
-	 * @var CMSDatabase
+	 * @var Ab_Database
 	 */
 	public $db = null;
 	
@@ -41,8 +41,7 @@ class RSSGrabber {
 		$this->registry = CMSRegistry::$instance;
 		$this->chanelid = $chanel['id'];
 		$this->chanel = $chanel;
-		$this->module = CMSRegistry::$instance->modules->GetModule('rss')->GetManager();
-		$this->db = $this->registry->db;
+		$this->module = Abricos::GetModule('rss')->GetManager();
 		$this->Grabber();
 	}
 	
@@ -51,11 +50,11 @@ class RSSGrabber {
 		$sec = $chanel ['chm'] * 60;
 		$lastupdate = $chanel ['chl'] * 1;
 		if ($lastupdate > 0 && TIMENOW - $sec < $lastupdate) { return; }
-		$rows = RSSQuery::SourceListByChanelId($this->db, $this->chanelid);
-		while (($row = $this->db->fetch_array($rows))) {
+		$rows = RSSQuery::SourceListByChanelId(Abricos::$db, $this->chanelid);
+		while (($row = Abricos::$db->fetch_array($rows))) {
 			$this->GrabberSource($row);
 		}
-		RSSQuery::ChanelUpdateLastGrabber($this->db, $chanel['id'], TIMENOW);
+		RSSQuery::ChanelUpdateLastGrabber(Abricos::$db, $chanel['id'], TIMENOW);
 	}
 	
 	private function GrabberSource($source) {
@@ -89,15 +88,9 @@ class RSSParser {
 	public $originalLink = "";
 	public $dt = "";
 	
-	/**
-	 * @var CMSDatabase
-	 */
-	public $db = null;
-	
 	public $source = null;
 	
 	public function __construct(CMSRegistry $registry, $source){
-		$this->db = $registry->db;
 		$this->source = $source;
 	}
 	
@@ -111,7 +104,7 @@ class RSSParser {
 	public function endElement($parser, $tagName) {
 		if ($tagName == "ITEM") {
 			$pubdate = strtotime($this->dt);
-			RSSQuery::RecordAppend($this->db, $this->source['id'], $this->originalLink, $this->title, $this->description, '', $pubdate, '');
+			RSSQuery::RecordAppend(Abricos::$db, $this->source['id'], $this->originalLink, $this->title, $this->description, '', $pubdate, '');
 			$this->title = "";
 			$this->originalLink = "";
 			$this->description = "";

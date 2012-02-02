@@ -17,12 +17,12 @@
  * @package Abricos
  * @subpackage RSS
  */
-class RSSModule extends CMSModule {
+class RSSModule extends Ab_Module {
 	
 	private $_manager = null;
 	
 	public function __construct(){
-		$this->version = "0.2.2.1";
+		$this->version = "0.2.3";
 		$this->name = "rss";
 		$this->takelink = "rss";
 		
@@ -83,7 +83,6 @@ class RSSPermission extends CMSPermission {
 	}
 }
 
-$modRss = new RSSModule();
-CMSRegistry::$instance->modules->Register($modRss);
+Abricos::ModuleRegister(new RSSModule());
 
 ?>

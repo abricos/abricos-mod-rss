@@ -8,13 +8,13 @@
  * @author Alexander Kuzmin (roosit@abricos.org)
  */
 
-$adress = Brick::$cms->adress;
+$adress = Abricos::$adress;
 
-$mod = Brick::$modules->GetModule($adress->dir[1]);
+$mod = Abricos::GetModule($adress->dir[1]);
 if (empty($mod)){
 	exit;
 }
-$manager = Brick::$modules->GetModule('rss')->GetManager();
+$manager = Abricos::GetModule('rss')->GetManager();
 
 $write = new CMSRssWriter2_0();
 $write->Header();

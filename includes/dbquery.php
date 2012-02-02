@@ -15,7 +15,7 @@
  */
 class RSSQuery {
 	
-	public static function RecordList(CMSDatabase $db, $chanelid, $count){
+	public static function RecordList(Ab_Database $db, $chanelid, $count){
 		$chanelid = bkint($chanelid);
 		$sql = "
 			SELECT 
@@ -36,7 +36,7 @@ class RSSQuery {
 		return $db->query_read($sql);
 	}
 	
-	public static function RecordInfoByLink(CMSDatabase $db, $link){
+	public static function RecordInfoByLink(Ab_Database $db, $link){
 		$sql = "
 			SELECT 
 				recordid as id 
@@ -47,7 +47,7 @@ class RSSQuery {
 		return $db->query_first($sql);
 	}
 	
-	public static function RecordAppend(CMSDatabase $db, $sourceid, $link, $title, $body, $author, $pubdate, $category=''){
+	public static function RecordAppend(Ab_Database $db, $sourceid, $link, $title, $body, $author, $pubdate, $category=''){
 		
 		// есть ли уже запись с таким линком
 		$info = RSSQuery::RecordInfoByLink($db, $link);
@@ -79,7 +79,7 @@ class RSSQuery {
 		$db->query_write($sql);
 	}
 	
-	public static function ChanelSourceRemoveSource(CMSDatabase $db, $sourceid){
+	public static function ChanelSourceRemoveSource(Ab_Database $db, $sourceid){
 		$sql = "
 			DELETE FROM ".$db->prefix."rss_chanelsource
 			WHERE sourceid=".bkint($sourceid)." 
@@ -87,7 +87,7 @@ class RSSQuery {
 		$db->query_write($sql);
 	}
 	
-	public static function ChanelSourceRemove(CMSDatabase $db, $chanelid){
+	public static function ChanelSourceRemove(Ab_Database $db, $chanelid){
 		$sql = "
 			DELETE FROM ".$db->prefix."rss_chanelsource
 			WHERE chanelid=".bkint($chanelid)." 
@@ -95,7 +95,7 @@ class RSSQuery {
 		$db->query_write($sql);
 	}
 	
-	public static function ChanelSourceUpdateFromArray(CMSDatabase $db, $chanelid, $sourceids){
+	public static function ChanelSourceUpdateFromArray(Ab_Database $db, $chanelid, $sourceids){
 		RSSQuery::ChanelSourceRemove($db, $chanelid);
 		$arr = array();
 		foreach ($sourceids as $id){
@@ -110,7 +110,7 @@ class RSSQuery {
 		$db->query_write($sql);
 	}
 	
-	public static function ChanelSourceList(CMSDatabase $db){
+	public static function ChanelSourceList(Ab_Database $db){
 		$sql = "
 			SELECT 
 				chanelsourceid as id,
@@ -121,7 +121,7 @@ class RSSQuery {
 		return $db->query_read($sql);
 	}
 	
-	public static function SourceRemove(CMSDatabase $db, $sourceid){
+	public static function SourceRemove(Ab_Database $db, $sourceid){
 		$sql = "
 			DELETE FROM ".$db->prefix."rss_source
 			WHERE sourceid=".bkint($sourceid)." 
@@ -130,7 +130,7 @@ class RSSQuery {
 		RSSQuery::ChanelSourceRemoveSource($db, $sourceid);
 	}
 	
-	public static function SourceUpdate(CMSDatabase $db, $data){
+	public static function SourceUpdate(Ab_Database $db, $data){
 		$sql = "
 			UPDATE ".$db->prefix."rss_source
 			SET
@@ -143,7 +143,7 @@ class RSSQuery {
 		$db->query_write($sql);
 	}
 	
-	public static function SourceAppend(CMSDatabase $db, $data){
+	public static function SourceAppend(Ab_Database $db, $data){
 		$sql = "
 			INSERT INTO ".$db->prefix."rss_source
 			(name, descript, url, prefix, dateline) VALUES 
@@ -158,7 +158,7 @@ class RSSQuery {
 		$db->query_write($sql);
 	}
 	
-	public static function SourceList(CMSDatabase $db){
+	public static function SourceList(Ab_Database $db){
 		$sql = "
 			SELECT 
 				sourceid as id,
@@ -171,7 +171,7 @@ class RSSQuery {
 		return $db->query_read($sql);
 	}
 	
-	public static function SourceListByChanelId(CMSDatabase $db, $chanelid){
+	public static function SourceListByChanelId(Ab_Database $db, $chanelid){
 		$sql = "
 			SELECT 
 				b.sourceid as id,
@@ -186,7 +186,7 @@ class RSSQuery {
 		return $db->query_read($sql);
 	}
 	
-	public static function ChanelRemove(CMSDatabase $db, $chanelid){
+	public static function ChanelRemove(Ab_Database $db, $chanelid){
 		$sql = "
 			DELETE FROM ".$db->prefix."rss_chanel
 			WHERE chanelid=".bkint($chanelid)." 
@@ -195,7 +195,7 @@ class RSSQuery {
 		RSSQuery::ChanelSourceRemove($db, $chanelid);
 	}
 	
-	public static function ChanelUpdate(CMSDatabase $db, $data){
+	public static function ChanelUpdate(Ab_Database $db, $data){
 		$sql = "
 			UPDATE ".$db->prefix."rss_chanel
 			SET
@@ -209,7 +209,7 @@ class RSSQuery {
 		RSSQuery::ChanelSourceUpdateFromArray($db, $data->id, $data->sourcelist);
 	}
 	
-	public static function ChanelUpdateLastGrabber(CMSDatabase $db, $chanelid, $checktime){
+	public static function ChanelUpdateLastGrabber(Ab_Database $db, $chanelid, $checktime){
 		$sql = "
 			UPDATE ".$db->prefix."rss_chanel
 			SET lastcheck=".bkint($checktime)."
@@ -218,7 +218,7 @@ class RSSQuery {
 		$db->query_write($sql);
 	}
 	
-	public static function ChanelAppend(CMSDatabase $db, $data){
+	public static function ChanelAppend(Ab_Database $db, $data){
 		$sql = "
 			INSERT INTO ".$db->prefix."rss_chanel
 			(name, descript, checkmin, getcount, dateline) VALUES 
@@ -235,7 +235,7 @@ class RSSQuery {
 		RSSQuery::ChanelSourceUpdateFromArray($db, $id, $data->sourcelist);
 	}
 	
-	public static function ChanelList(CMSDatabase $db){
+	public static function ChanelList(Ab_Database $db){
 		$sql = "
 			SELECT
 				chanelid as id, 
@@ -251,7 +251,7 @@ class RSSQuery {
 		return $db->query_read($sql);
 	}
 	
-	public static function Chanel(CMSDatabase $db, $chanelid){
+	public static function Chanel(Ab_Database $db, $chanelid){
 		$sql = "
 			SELECT
 				chanelid as id, 
@@ -268,7 +268,7 @@ class RSSQuery {
 		return $db->query_first($sql);
 	}
 	
-	public static function ChanelFirst(CMSDatabase $db){
+	public static function ChanelFirst(Ab_Database $db){
 		$sql = "
 			SELECT
 				chanelid as id, 

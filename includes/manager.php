@@ -10,7 +10,7 @@
 
 require_once 'dbquery.php';
 
-class RSSManager extends ModuleManager {
+class RSSManager extends Ab_ModuleManager {
 	
 	/**
 	 * 
@@ -18,31 +18,21 @@ class RSSManager extends ModuleManager {
 	 */
 	public $module = null;
 	
-	/**
-	 * User
-	 * @var User
-	 */
-	public $user = null;
-	public $userid = 0;
-	
-	public function RSSManager(RSSModule $module){
-		parent::ModuleManager($module);
-		
-		$this->user = CMSRegistry::$instance->modules->GetModule('user');
-		$this->userid = $this->user->info['userid'];
+	public function __construct(RSSModule $module){
+		parent::__construct($module);
 	}
 	
 	
 	public function IsAdminRole(){
-		return $this->module->permission->CheckAction(RSSAction::ADMIN) > 0;
+		return $this->IsRoleEnable(RSSAction::ADMIN);
 	}
 	
 	public function IsManagerRole(){
-		return $this->module->permission->CheckAction(RSSAction::MANAGER) > 0;
+		return $this->IsRoleEnable(RSSAction::MANAGER);
 	}
 	
 	public function IsViewRole(){
-		return $this->module->permission->CheckAction(RSSAction::VIEW) > 0;
+		return $this->IsRoleEnable(RSSAction::VIEW);
 	}
 	
 	public function DSProcess($name, $rows){
@@ -242,7 +232,7 @@ class CMSRssWriter2_0 {
 	
 	public function Open(){
 		
-		$link = Brick::$cms->adress->host.Brick::$cms->adress->requestURI;
+		$link = Abricos::$adress->host.Abricos::$adress->requestURI;
 		print (
 "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
 <rss version=\"2.0\">

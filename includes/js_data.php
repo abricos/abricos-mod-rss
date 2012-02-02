@@ -9,8 +9,8 @@
  */
 
 $brick = Brick::$builder->brick;
-$mod = Brick::$modules->GetModule('sys');
-$rssManager = Brick::$modules->GetModule('rss')->GetManager();
+$mod = Abricos::GetModule('sys');
+$rssManager = Abricos::GetModule('rss')->GetManager();
 
 $ds = $mod->getDataSet();
 $ret = new stdClass();
