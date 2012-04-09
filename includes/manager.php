@@ -22,7 +22,6 @@ class RSSManager extends Ab_ModuleManager {
 		parent::__construct($module);
 	}
 	
-	
 	public function IsAdminRole(){
 		return $this->IsRoleEnable(RSSAction::ADMIN);
 	}
@@ -149,20 +148,6 @@ class RSSManager extends Ab_ModuleManager {
 		return RSSQuery::ChanelSourceList($this->db);
 	}
 	
-	
-	public function RSSWrite($writer, $chanelid) {
-		$rows = $this->RecordList($chanelid);
-		while (($row = $this->db->fetch_array($rows))) {
-			$title = $row['tl'];
-			if (!empty($row['pfx'])){
-				$title = $row['pfx'].": ".$title;
-			}
-			$item = new CMSRssWriter2_0Item($title, $row['lnk'], $row['body']);
-			$item->pubDate = $row['pdt'];
-			$writer->WriteItem($item);
-		}
-	}
-	
 	private function Grabber($chanel){
 		require_once 'grabber.php';
 		$grabber = new RSSGrabber($chanel);
@@ -192,26 +177,28 @@ class RSSManager extends Ab_ModuleManager {
 }
 
 
-
 /**
  * Элемент RSS записи
+ * 
  * @package Abricos 
  * @subpackage RSS
  */
-class CMSRssWriter2_0Item {
+class RSSItem {
 	
 	public $title = "";
 	public $link = "";
 	public $description = "";
 	
-	public $pubDate = "";
+	public $pubDate = 0;
 	public $autor = "";
 	public $category = array();
+	public $modTitle = "";
 	
-	public function __construct($title, $link, $description){
+	public function __construct($title, $link, $description="", $pubDate = 0){
 		$this->title = $title;
 		$this->link = $link;
 		$this->description = $description;
+		$this->pubDate = $pubDate;
 	}
 }
 
@@ -248,12 +235,17 @@ class CMSRssWriter2_0 {
 		);		
 	}
 	
-	public function WriteItem(CMSRssWriter2_0Item $item){
+	public function WriteItem(RSSItem $item, $addModTitle = false){
 		print ("
 		<item>");
 		
+		$title = $item->title;
+		if ($addModTitle && !empty($item->modTitle)){
+			$title = "[".$item->modTitle."] ".$title;
+		}
+		
 		print("
-			<title><![CDATA[".$item->title."]]></title>
+			<title><![CDATA[".$title."]]></title>
 			<guid isPermaLink=\"true\">".$item->link."</guid>
 			<link>".$item->link."</link>			
 			<description><![CDATA[".$item->description."]]></description>");

@@ -22,7 +22,7 @@ class RSSModule extends Ab_Module {
 	private $_manager = null;
 	
 	public function __construct(){
-		$this->version = "0.2.3";
+		$this->version = "0.2.4";
 		$this->name = "rss";
 		$this->takelink = "rss";
 		
@@ -34,22 +34,57 @@ class RSSModule extends Ab_Module {
 	 */
 	public function GetManager(){
 		if (is_null($this->_manager)){
-			require_once CWD.'/modules/rss/includes/manager.php';
+			require_once 'includes/manager.php';
 			$this->_manager = new RSSManager($this);
 		}
 		return $this->_manager;
 	}
 	
 	public function RssMetaLink(){
-		return $this->registry->adress->host."/rss/rss/";
+		return $this->registry->adress->host."/rss/";
+	}
+
+	// если RSS без параметров, то все модули, иначе подписанный канал
+	public function RSS_GetItemList(){
+		$chanelid = $this->registry->adress->dir[1];
+		$ret = array();
+		
+		if (empty($chanelid)){
+			$ret = $this->RSS_GetItemListAll();
+		}else{
+			$manager = $this->GetManager();
+			$rows = $manager->RecordList($chanelid);
+			while (($row = $this->registry->db->fetch_array($rows))) {
+				$title = $row['tl'];
+				if (!empty($row['pfx'])){
+					$title = $row['pfx'].": ".$title;
+				}
+				$item = new RSSItem($title, $row['lnk'], $row['body'], $row['pdt']);
+				array_push($ret, $item);
+			}
+		}
+		return $ret;
 	}
 	
-	public function RssWrite(CMSRssWriter2_0 $writer){
-		$chanelid = $this->registry->adress->dir[2];
-		$manager = $this->GetManager();
-		$manager->RSSWrite($writer, $chanelid);
-	}
 	
+	public function RSS_GetItemListAll($inBosUI = false, $onemod = ""){
+		$ret = array();
+		
+		Abricos::$instance->modules->RegisterAllModule();
+		$modules = Abricos::$instance->modules->GetModules();
+			
+		foreach ($modules as $name => $module){
+			if ($name == 'rss' || $name == 'bos' || !method_exists($module, 'RSS_GetItemList')){
+				continue;
+			}
+			if (!empty($onemod) && $name != $onemod){
+				continue;
+			}
+			$data = $module->RSS_GetItemList($inBosUI);
+			$ret = array_merge_recursive($ret, $data);
+		}
+		return $ret;
+	}
 }
 
 class RSSAction {

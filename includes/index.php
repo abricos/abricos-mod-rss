@@ -8,19 +8,55 @@
  * @author Alexander Kuzmin (roosit@abricos.org)
  */
 
-$adress = Abricos::$adress;
-
-$mod = Abricos::GetModule($adress->dir[1]);
-if (empty($mod)){
-	exit;
-}
 $manager = Abricos::GetModule('rss')->GetManager();
 
 $write = new CMSRssWriter2_0();
 $write->Header();
 $write->Open();
 
-$mod->RssWrite($write);
+
+$dir = Abricos::$adress->dir[1];
+if (empty($dir)){
+	$dir = "rss";
+}
+
+$mod = Abricos::GetModule($dir);
+if (!empty($mod)){
+
+	if(method_exists($mod, 'RSS_GetItemList')){
+		$data = $mod->RSS_GetItemList(Abricos::$adress->dir[2] == 'bos');
+
+		$asr = array();
+		$modTitle = null;
+		$isViewGroup = false;
+		
+		foreach($data as $item){
+			array_push($asr, $item->pubDate);
+			if (is_null($modTitle)){
+				$modTitle = $item->modTitle;
+			}
+			if ($modTitle != $item->modTitle){
+				$isViewGroup = true;
+			}
+		}
+		rsort($asr);
+		for ($i=0; $i<count($asr); $i++){
+			$ndata = array();
+			$move = false;
+			foreach($data as $item){
+				if ($item->pubDate == $asr[$i] && !$move){
+					$move = true;
+					$write->WriteItem($item, $isViewGroup);
+				}else{
+					array_push($ndata, $item);
+				}
+			}
+			$data = $ndata;
+		}
+	}
+	
+}
 
 $write->Close();
+
 ?>
