@@ -13,6 +13,9 @@ if (!method_exists($mod, 'RssMetaLink')){
 	$default = Brick::$builder->phrase->Get('rss', 'default');
 	if (!empty($default)){
 		$mod = Abricos::GetModule($default);
+		if (!method_exists($mod, 'RssMetaLink')){
+			return;
+		}
 	}else{
 		return;
 	}
