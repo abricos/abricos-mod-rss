@@ -1,18 +1,11 @@
-<!--{widget}-->
-<div id="{i#id}" >
-	<div id="{i#list}"><img src="/images/loading.gif" /> Загрузка ленты...</div>
+<!--{widget}--><div id="{i#id}" >
+	<div id="{i#list}"><img src="/images/loading.gif" />{#mod.rss.online.widget.1}</div>
 </div>
-
-<!--{title}-->
-<span title="RSS лента рекомендованная администрацией сайта">RSS лента</span>
-
-<!--{header}-->
-<div style="margin-bottom: 5px;">
+<!--{title}--><span title="{#mod.rss.online.title.1}">{#mod.rss.online.title.2}</span>
+<!--{header}--><div style="margin-bottom: 5px;">
 	<span style="font-weight:bold; color:#2e313e; font-size: 12px;">{v#tl}</span>
 </div>
-
-<!--{row}-->
-<div style="margin-bottom: 5px;">
+<!--{row}--><div style="margin-bottom: 5px;">
 	<span style="color:#81888F; font-size: 10px;">{v#dl}</span>
 	<a style="margin-left: 5px;" href="{v#link}" target="_blank">{v#tl}</a>
 </div>

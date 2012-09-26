@@ -22,7 +22,7 @@ class RSSModule extends Ab_Module {
 	private $_manager = null;
 	
 	public function __construct(){
-		$this->version = "0.2.4";
+		$this->version = "0.2.5";
 		$this->name = "rss";
 		$this->takelink = "rss";
 		
