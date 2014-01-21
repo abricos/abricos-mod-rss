@@ -2,7 +2,6 @@
 /**
  * Модуль "RSS"
  * 
- * @version $Id$
  * @package Abricos 
  * @subpackage RSS
  * @copyright Copyright (C) 2008 Abricos. All rights reservedd.
@@ -22,7 +21,7 @@ class RSSModule extends Ab_Module {
 	private $_manager = null;
 	
 	public function __construct(){
-		$this->version = "0.2.5";
+		$this->version = "0.2.6-dev";
 		$this->name = "rss";
 		$this->takelink = "rss";
 		
