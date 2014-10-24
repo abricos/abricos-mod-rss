@@ -92,20 +92,20 @@ class RSSAction {
 	const ADMIN = 50;
 }
 
-class RSSPermission extends CMSPermission {
+class RSSPermission extends Ab_UserPermission {
 	
-	public function RSSPermission(RSSModule $module){
+	public function __construct(RSSModule $module){
 		
 		$defRoles = array(
-			new CMSRole(RSSAction::VIEW, 1, User::UG_GUEST),
-			new CMSRole(RSSAction::VIEW, 1, User::UG_REGISTERED),
-			new CMSRole(RSSAction::VIEW, 1, User::UG_ADMIN),
+			new Ab_UserRole(RSSAction::VIEW, Ab_UserGroup::GUEST),
+			new Ab_UserRole(RSSAction::VIEW, Ab_UserGroup::REGISTERED),
+			new Ab_UserRole(RSSAction::VIEW, Ab_UserGroup::ADMIN),
 			
-			new CMSRole(RSSAction::MANAGER, 1, User::UG_ADMIN),
-			new CMSRole(RSSAction::ADMIN, 1, User::UG_ADMIN)
+			new Ab_UserRole(RSSAction::MANAGER, Ab_UserGroup::ADMIN),
+			new Ab_UserRole(RSSAction::ADMIN, Ab_UserGroup::ADMIN)
 		);
-		
-		parent::CMSPermission($module, $defRoles);
+
+        parent::__construct($module, $defRoles);
 	}
 	
 	public function GetRoles(){
