@@ -207,7 +207,7 @@ class RSSItem {
  * @package Abricos
  * @subpackage RSS
  */
-class CMSRssWriter2_0 {
+class RssWriter2_0 {
 	
 	public function Header(){
 		header("Expires: Mon, 26 Jul 2005 15:00:00 GMT");

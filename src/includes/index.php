@@ -1,6 +1,5 @@
 <?php
 /**
- * @version $Id$
  * @package Abricos
  * @subpackage RSS
  * @copyright Copyright (C) 2008 Abricos. All rights reserved.
@@ -10,7 +9,7 @@
 
 $manager = Abricos::GetModule('rss')->GetManager();
 
-$write = new CMSRssWriter2_0();
+$write = new RssWriter2_0();
 $write->Header();
 $write->Open();
 

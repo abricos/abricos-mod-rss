@@ -40,12 +40,12 @@ class RSSModule extends Ab_Module {
 	}
 	
 	public function RssMetaLink(){
-		return $this->registry->adress->host."/rss/";
+		return Abricos::$adress->fetch_host()."/rss/";
 	}
 
 	// если RSS без параметров, то все модули, иначе подписанный канал
 	public function RSS_GetItemList(){
-		$chanelid = $this->registry->adress->dir[1];
+		$chanelid = Abricos::$adress->dir[1];
 		$ret = array();
 		
 		if (empty($chanelid)){
@@ -53,7 +53,7 @@ class RSSModule extends Ab_Module {
 		}else{
 			$manager = $this->GetManager();
 			$rows = $manager->RecordList($chanelid);
-			while (($row = $this->registry->db->fetch_array($rows))) {
+			while (($row = Abricos::$db->fetch_array($rows))) {
 				$title = $row['tl'];
 				if (!empty($row['pfx'])){
 					$title = $row['pfx'].": ".$title;
@@ -69,8 +69,8 @@ class RSSModule extends Ab_Module {
 	public function RSS_GetItemListAll($inBosUI = false, $onemod = ""){
 		$ret = array();
 		
-		Abricos::$instance->modules->RegisterAllModule();
-		$modules = Abricos::$instance->modules->GetModules();
+		Abricos::$modules->RegisterAllModule();
+		$modules = Abricos::$modules->GetModules();
 			
 		foreach ($modules as $name => $module){
 			if ($name == 'rss' || $name == 'bos' || !method_exists($module, 'RSS_GetItemList')){
