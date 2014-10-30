@@ -106,7 +106,7 @@ class RSSManager extends Ab_ModuleManager {
 	
 	public function ModuleList(){
 		if (!$this->IsAdminRole()){ return; }
-		$modules = CMSRegistry::$instance->modules;
+		$modules = Abricos::$modules;
 		$modules->RegisterAllModule();
 		$arr = array();
 		foreach ($modules->table as $childmod){

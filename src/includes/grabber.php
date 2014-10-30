@@ -16,13 +16,6 @@
 class RSSGrabber {
 	
 	/**
-	 * Ядро
-	 *
-	 * @var CMSRegistry
-	 */
-	public $registry = null;
-	
-	/**
 	 * @var Ab_Database
 	 */
 	public $db = null;
@@ -38,7 +31,6 @@ class RSSGrabber {
 	
 	
 	public function __construct($chanel) {
-		$this->registry = CMSRegistry::$instance;
 		$this->chanelid = $chanel['id'];
 		$this->chanel = $chanel;
 		$this->module = Abricos::GetModule('rss')->GetManager();
@@ -59,7 +51,7 @@ class RSSGrabber {
 	
 	private function GrabberSource($source) {
 		$xml_parser = xml_parser_create("UTF-8");
-		$rss_parser = new RSSParser($this->registry, $source);
+		$rss_parser = new RSSParser($source);
 
 		xml_set_object($xml_parser, $rss_parser);
 		xml_set_element_handler($xml_parser, "startElement", "endElement" );
@@ -90,7 +82,7 @@ class RSSParser {
 	
 	public $source = null;
 	
-	public function __construct(CMSRegistry $registry, $source){
+	public function __construct($source){
 		$this->source = $source;
 	}
 	
