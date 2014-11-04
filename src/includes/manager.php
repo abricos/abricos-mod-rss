@@ -224,12 +224,12 @@ class RssWriter2_0 {
 "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
 <rss version=\"2.0\">
 <channel>
-	<title>".Brick::$builder->phrase->Get('sys', 'site_name')."</title>
+	<title>".SystemModule::$instance->GetPhrases()->Get('site_name')."</title>
 	<link>".$link."</link>
 	<description><![CDATA[]]></description>
 	<language>".LNG."</language>
-	<managingEditor>".Brick::$builder->phrase->Get('sys', 'admin_mail')."</managingEditor>
-	<generator>".Brick::$builder->phrase->Get('sys', 'admin_mail')."</generator>
+	<managingEditor>".SystemModule::$instance->GetPhrases()->Get('admin_mail')."</managingEditor>
+	<generator>".SystemModule::$instance->GetPhrases()->Get('admin_mail')."</generator>
 	<pubDate>". gmdate("D, d M Y H:i:s") ."</pubDate>
 "
 		);		

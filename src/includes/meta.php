@@ -1,6 +1,5 @@
 <?php 
 /**
- * @version $Id$
  * @package Abricos
  * @subpackage RSS
  * @copyright Copyright (C) 2008 Abricos. All rights reservedd.
@@ -10,7 +9,8 @@
 
 $mod = Brick::$modman;
 if (!method_exists($mod, 'RssMetaLink')){
-	$default = Brick::$builder->phrase->Get('rss', 'default');
+
+	$default = Abricos::GetModule('rss')->GetPhrases()->Get('default');
 	if (!empty($default)){
 		$mod = Abricos::GetModule($default);
 		if (!method_exists($mod, 'RssMetaLink')){
