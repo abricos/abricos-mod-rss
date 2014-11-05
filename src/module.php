@@ -21,7 +21,7 @@ class RSSModule extends Ab_Module {
 	private $_manager = null;
 	
 	public function __construct(){
-		$this->version = "0.2.6-dev";
+		$this->version = "0.2.6";
 		$this->name = "rss";
 		$this->takelink = "rss";
 		
@@ -69,8 +69,7 @@ class RSSModule extends Ab_Module {
 	public function RSS_GetItemListAll($inBosUI = false, $onemod = ""){
 		$ret = array();
 		
-		Abricos::$modules->RegisterAllModule();
-		$modules = Abricos::$modules->GetModules();
+		$modules = Abricos::$modules->RegisterAllModule();
 			
 		foreach ($modules as $name => $module){
 			if ($name == 'rss' || $name == 'bos' || !method_exists($module, 'RSS_GetItemList')){
