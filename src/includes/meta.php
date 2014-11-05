@@ -10,7 +10,7 @@
 $mod = Brick::$modman;
 if (!method_exists($mod, 'RssMetaLink')){
 
-	$default = Abricos::GetModule('rss')->GetPhrases()->Get('default');
+	$default = Abricos::GetModule('rss')->GetPhrases()->Get('default')->value;
 	if (!empty($default)){
 		$mod = Abricos::GetModule($default);
 		if (!method_exists($mod, 'RssMetaLink')){
