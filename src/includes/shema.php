@@ -10,17 +10,17 @@
  */
 
 $charset = "CHARACTER SET 'utf8' COLLATE 'utf8_general_ci'";
-$updateManager = Ab_UpdateManager::$current; 
+$updateManager = Ab_UpdateManager::$current;
 $db = Abricos::$db;
 $pfx = $db->prefix;
 
-if ($updateManager->serverVersion == '1.0.1'){
-	$updateManager->serverVersion = '0.2.1';
+if ($updateManager->serverVersion == '1.0.1') {
+    $updateManager->serverVersion = '0.2.1';
 }
 
-if ($updateManager->isInstall()){
-	// RSS канал
-	$db->query_write("
+if ($updateManager->isInstall()) {
+    // RSS канал
+    $db->query_write("
 		CREATE TABLE IF NOT EXISTS ".$pfx."rss_chanel (
 		  `chanelid` int(10) unsigned NOT NULL auto_increment,
 		  `name` varchar(100) NOT NULL default '' COMMENT 'Имя канала',
@@ -32,11 +32,10 @@ if ($updateManager->isInstall()){
 		  `dateline` int(10) unsigned NOT NULL default '0',
 		  `deldate` int(10) unsigned NOT NULL default '0',
 		  PRIMARY KEY  (`chanelid`)
-		 )".$charset
-	);
+		 )".$charset);
 
-	// RSS источник
-	$db->query_write("
+    // RSS источник
+    $db->query_write("
 		CREATE TABLE IF NOT EXISTS ".$pfx."rss_source (
 		  `sourceid` int(10) unsigned NOT NULL auto_increment,
 		  `name` varchar(100) NOT NULL default '' COMMENT 'Имя',
@@ -46,21 +45,19 @@ if ($updateManager->isInstall()){
 		  `dateline` int(10) unsigned NOT NULL default '0',
 		  `deldate` int(10) unsigned NOT NULL default '0',
 		  PRIMARY KEY  (`sourceid`)
-		 )".$charset
-	);
+		 )".$charset);
 
-	// принадлежность источника к каналу
-	$db->query_write("
+    // принадлежность источника к каналу
+    $db->query_write("
 		CREATE TABLE IF NOT EXISTS ".$pfx."rss_chanelsource (
 		  `chanelsourceid` int(10) unsigned NOT NULL auto_increment,
 		  `chanelid` int(10) unsigned NOT NULL default '0' COMMENT 'Идентификатор канала',
 		  `sourceid` int(10) unsigned NOT NULL default '0' COMMENT 'Идентификатор источника',
 		  PRIMARY KEY  (`chanelsourceid`)
-		 )".$charset
-	);
+		 )".$charset);
 
-	// Прочитанные записи из источника
-	$db->query_write("
+    // Прочитанные записи из источника
+    $db->query_write("
 		CREATE TABLE IF NOT EXISTS ".$pfx."rss_record (
 		  `recordid` int(10) unsigned NOT NULL auto_increment,
 		  `sourceid` int(10) unsigned NOT NULL default '0' COMMENT 'Идентификатор источника',
@@ -71,12 +68,11 @@ if ($updateManager->isInstall()){
 		  `category` varchar(50) NOT NULL default '' COMMENT 'Категория',
 		  `pubdate` int(10) unsigned NOT NULL default '0' COMMENT 'Дата публикации',
 		  PRIMARY KEY (`recordid`)
-		 )".$charset
-	);
+		 )".$charset);
 }
 
-if ($updateManager->isUpdate('0.2.2.1')){
-	Abricos::GetModule('rss')->permission->Install();
+if ($updateManager->isUpdate('0.2.2.1')) {
+    Abricos::GetModule('rss')->permission->Install();
 }
 /*
 if ($updateManager->isUpdate('0.2.2.2')){
