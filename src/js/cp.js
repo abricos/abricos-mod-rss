@@ -13,7 +13,7 @@ Component.requires = {
 };
 Component.entryPoint = function() {
 
-    if (Brick.Permission.check('user', '50') !== 1) {
+    if (Brick.AppRoles.check('user', '50')) {
         return;
     }
 
