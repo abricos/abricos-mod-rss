@@ -13,13 +13,11 @@ Component.requires = {
         {name: 'rss', files: ['chanel.js']}
     ]
 };
-Component.entryPoint = function(){
+Component.entryPoint = function(NS){
     var Dom = YAHOO.util.Dom,
-        E = YAHOO.util.Event,
-        L = YAHOO.lang;
+        E = YAHOO.util.Event;
 
-    var NS = this.namespace,
-        TMG = this.template;
+    var buildTemplate = this.buildTemplate;
 
     var API = NS.API;
 
@@ -33,7 +31,7 @@ Component.entryPoint = function(){
         };
         ManagerWidget.prototype = {
             init: function(container){
-                var TM = TMG.build('manager'), T = TM.data, TId = TM.idManager;
+                var TM = buildTemplate(this, 'manager'), T = TM.data;
 
                 container.innerHTML = T['manager'];
 
@@ -70,11 +68,8 @@ Component.entryPoint = function(){
         };
         ConfigWidget.prototype = {
             init: function(container){
-                var TM = TMG.build('config,configoptionmod,configoption'),
+                var TM = buildTemplate(this, 'config,configoptionmod,configoption'),
                     T = TM.data, TId = TM.idManager;
-                this._TM = TM;
-                this._T = T;
-                this._TId = TId;
 
                 container.innerHTML = T['config'];
 
