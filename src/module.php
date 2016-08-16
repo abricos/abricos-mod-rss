@@ -117,5 +117,3 @@ class RSSPermission extends Ab_UserPermission {
 }
 
 Abricos::ModuleRegister(new RSSModule());
-
-?>

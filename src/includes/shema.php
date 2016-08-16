@@ -117,4 +117,3 @@ if ($updateManager->isUpdate('0.2.2.2')){
 	$db->query_write("ALTER TABLE `".$pfx."rss_record` ADD UNIQUE KEY `link` ( `link` )");
 }
 /**/
-?>

@@ -319,6 +319,3 @@ class RssWriter2_0 {
         exit;
     }
 }
-
-
-?>

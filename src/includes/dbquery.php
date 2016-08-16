@@ -287,5 +287,3 @@ class RSSQuery {
         return $db->query_first($sql);
     }
 }
-
-?>

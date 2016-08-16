@@ -23,5 +23,3 @@ if (!method_exists($mod, 'RssMetaLink')) {
 $brick = Brick::$builder->brick;
 
 $brick->content = str_replace("{v#link}", $mod->RssMetaLink(), $brick->param->var['link']);
-
-?>

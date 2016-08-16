@@ -57,5 +57,3 @@ if (!empty($mod)) {
 }
 
 $write->Close();
-
-?>
