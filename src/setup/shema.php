@@ -1,12 +1,10 @@
 <?php
 /**
- * Схема таблиц модуля
- * @version $Id$
  * @package Abricos
  * @subpackage RSS
- * @copyright Copyright (C) 2008 Abricos. All rights reservedd.
- * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
- * @author Alexander Kuzmin (roosit@abricos.org)
+ * @copyright 2008-2016 Alexander Kuzmin
+ * @license http://opensource.org/licenses/mit-license.php MIT License
+ * @author Alexander Kuzmin <roosit@abricos.org>
  */
 
 $charset = "CHARACTER SET 'utf8' COLLATE 'utf8_general_ci'";
@@ -14,11 +12,11 @@ $updateManager = Ab_UpdateManager::$current;
 $db = Abricos::$db;
 $pfx = $db->prefix;
 
-if ($updateManager->serverVersion == '1.0.1') {
+if ($updateManager->serverVersion == '1.0.1'){
     $updateManager->serverVersion = '0.2.1';
 }
 
-if ($updateManager->isInstall()) {
+if ($updateManager->isInstall()){
     // RSS канал
     $db->query_write("
 		CREATE TABLE IF NOT EXISTS ".$pfx."rss_chanel (
@@ -71,7 +69,7 @@ if ($updateManager->isInstall()) {
 		 )".$charset);
 }
 
-if ($updateManager->isUpdate('0.2.2.1')) {
+if ($updateManager->isUpdate('0.2.2.1')){
     Abricos::GetModule('rss')->permission->Install();
 }
 /*
